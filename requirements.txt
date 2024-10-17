@@ -1,11 +1,1 @@
-streamlit 
-speech_recognition
-pyttsx3
-google.generativeai
-PIL
-io
-os
-PyPDF2
-docx
-json
-random
+pip install streamlit google-generativeai SpeechRecognition gtts PyPDF2 python-docx opencv-python numpy
