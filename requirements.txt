@@ -1,11 +1,11 @@
-import streamlit as st
-import speech_recognition as sr
-import pyttsx3
-import google.generativeai as genai
-from PIL import Image
-import io
-import os
-import PyPDF2
-import docx
-import json
-import random
+streamlit 
+speech_recognition as sr
+pyttsx3
+google.generativeai as genai
+PIL import Image
+io
+os
+PyPDF2
+docx
+json
+random
