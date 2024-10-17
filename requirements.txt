@@ -1,8 +1,8 @@
 streamlit 
-speech_recognition as sr
+speech_recognition
 pyttsx3
-google.generativeai as genai
-PIL import Image
+google.generativeai
+PIL
 io
 os
 PyPDF2
