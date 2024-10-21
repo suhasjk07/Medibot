@@ -6,4 +6,4 @@ python_docx
 pyttsx3
 SpeechRecognition
 streamlit
-google.generativeai
+GoogleGenerativeai
