@@ -9,3 +9,4 @@ SpeechRecognition
 streamlit
 googletrans
 nltk
+genai
