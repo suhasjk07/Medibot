@@ -3,6 +3,7 @@ import speech_recognition as sr
 import google.generativeai as genai
 from PIL import Image
 import io
+import uuid
 import os
 import PyPDF2
 import docx
@@ -66,17 +67,25 @@ def speak(text, lang='en'):
     text = text.replace('&', ' and ')
     text = text.replace('$', ' dollars ')
     text = text.replace('@', ' at ')
-    text = text.replace('.', '')
-    text = text.replace('*', '')
-    text = text.replace('*', '')
+    text = text.replace('*', '  ')
     
     # Translate text if not in English
     if lang != 'en':
         text = translator.translate(text, dest=lang).text
+
+    # Create a directory to store audio files if it doesn't exist
+    audio_dir = "audio_files"
+    if not os.path.exists(audio_dir):
+        os.makedirs(audio_dir)
+
     
     # Save the text as a temporary audio file
     tts = gTTS(text=text, lang=lang)
     tts.save("temp_audio.mp3")
+
+    # Generate a unique filename for the audio file
+    filename = f"{uuid.uuid4()}.mp3"
+    audio_path = os.path.join(audio_dir, filename)
     
     # Play the audio file
     pygame.mixer.music.load("temp_audio.mp3")
@@ -85,6 +94,7 @@ def speak(text, lang='en'):
 # Function to stop audio playback
 def stop_audio():
     pygame.mixer.music.stop()
+
 
 # Function to analyze files
 def analyze_file(file):
@@ -104,8 +114,8 @@ def analyze_file(file):
     return summary
 
 # Streamlit UI
-st.title("Namma-Sakhi:Your AI-Powered Medical companion")
-st.markdown("Ask anything in any language.....you problem == My problem")
+st.title("Advanced AI-Powered Medical Chatbot")
+
 # Sidebar for feature selection
 st.sidebar.title("Features")
 feature = st.sidebar.radio("Select a feature", 
@@ -122,10 +132,12 @@ lang_code = languages[selected_language]
 
 if feature == "Patient Interface":
     st.header("Patient Interface")
-    sub_feature = st.selectbox("Choose a service", ["Chat", "File Analysis", "Symptom Checker", "Health Advice", "Voice Interaction", "Diet Plan Creator", "Predictive Health", "Appointment Scheduling"])
+    
+    sub_feature = st.selectbox("Choose a service", 
+        ["Chat", "File Analysis", "Symptom Checker", "Health Advice", "Voice Interaction", "Diet Plan Creator", "Predictive Health", "Appointment Scheduling"])
 
-if sub_feature == "Chat":
-        user_input = st.text_input("Ask a medical question or request a drug photo:")
+    if sub_feature == "Chat":
+        user_input = st.text_input("Ask a medical question:")
         if user_input:
             response = generate_response(user_input)
             st.write("Namma Sakhi:", response)
@@ -134,7 +146,7 @@ if sub_feature == "Chat":
             if "drug photo" in user_input.lower():
                 st.image("https://via.placeholder.com/300x200.png?text=Drug+Photo+Placeholder", caption="Requested Drug Photo")
 
-elif sub_feature == "File Analysis":
+    elif sub_feature == "File Analysis":
         uploaded_file = st.file_uploader("Upload a medical document", type=["pdf", "docx", "txt"])
         if uploaded_file:
             summary = analyze_file(uploaded_file)
@@ -142,7 +154,7 @@ elif sub_feature == "File Analysis":
             if st.button("Read Summary"):
                 speak(summary, lang_code)
 
-elif sub_feature == "Symptom Checker":
+    elif sub_feature == "Symptom Checker":
         symptoms = st.multiselect("Select your symptoms:", 
             ["Fever", "Cough", "Headache", "Fatigue", "Nausea", "Shortness of breath", "Chest pain", "Abdominal pain", "Diarrhea", "Vomiting", "Muscle aches", "Sore throat"])
         if st.button("Check Symptoms"):
@@ -152,7 +164,7 @@ elif sub_feature == "Symptom Checker":
             if st.button("Read Diagnosis"):
                 speak(diagnosis, lang_code)
 
-elif sub_feature == "Health Advice":
+    elif sub_feature == "Health Advice":
         age = st.number_input("Age", min_value=0, max_value=120)
         weight = st.number_input("Weight (kg)", min_value=0.0)
         height = st.number_input("Height (cm)", min_value=0.0)
@@ -162,22 +174,18 @@ elif sub_feature == "Health Advice":
             if st.button("Read Advice"):
                 speak(advice, lang_code)
 
-elif sub_feature == "Voice Interaction":
-        user_speech = None
-        sentiment = None
+    elif sub_feature == "Voice Interaction":
         if st.button("Start Voice Interaction"):
             user_speech, sentiment = process_voice_input()
             st.write("You said:", user_speech)
-            
-            if sentiment is not None:
+            if sentiment:
                 st.write("Detected Sentiment:", sentiment)
-            
             if user_speech != "Sorry, I could not understand that.":
                 ai_response = generate_response(user_speech)
                 st.write("Namma Sakhi:", ai_response)
                 speak(ai_response, lang_code)
 
-elif sub_feature == "Diet Plan Creator":
+    elif sub_feature == "Diet Plan Creator":
         age = st.number_input("Age", min_value=0, max_value=120, key="diet_age")
         weight = st.number_input("Weight (kg)", min_value=0.0, key="diet_weight")
         height = st.number_input("Height (cm)", min_value=0.0, key="diet_height")
@@ -189,7 +197,7 @@ elif sub_feature == "Diet Plan Creator":
             if st.button("Read Diet Plan"):
                 speak(diet_plan, lang_code)
 
-elif sub_feature == "Predictive Health":
+    elif sub_feature == "Predictive Health":
         st.write("Please provide your health information for a predictive analysis:")
         age = st.number_input("Age", min_value=0, max_value=120, key="pred_age")
         gender = st.selectbox("Gender", ["Male", "Female", "Other"])
@@ -201,7 +209,7 @@ elif sub_feature == "Predictive Health":
             if st.button("Read Health Report"):
                 speak(prediction, lang_code)
 
-elif sub_feature == "Appointment Scheduling":
+    elif sub_feature == "Appointment Scheduling":
         patient_name = st.text_input("Patient Name")
         appointment_date = st.date_input("Preferred Date")
         appointment_time = st.time_input("Preferred Time")
@@ -212,7 +220,7 @@ elif sub_feature == "Appointment Scheduling":
             if st.button("Read Confirmation"):
                 speak(confirmation, lang_code)
 
-if st.button("Stop Audio"):
+    if st.button("Stop Audio"):
         stop_audio()
 
 elif feature == "Doctor Registration":
